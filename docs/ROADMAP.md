@@ -30,43 +30,43 @@
 
 ### Fase 0 — Fundação
 **Bloco A · Esqueleto do projeto**
-- `SPEC-001` — Scaffold Next.js (App Router) + TS + Tailwind + shadcn + estrutura de pastas + deploy Vercel vazio.
+- [x] `SPEC-001` — Scaffold Next.js (App Router) + TS + Tailwind + shadcn + estrutura de pastas + deploy Vercel vazio.
 
 **Bloco B · Dados de domínio**
-- `SPEC-002` — Dataset tipado dos 9 cursos (fase, horas, módulos, aulas reais) como fonte única de verdade.
+- [x] `SPEC-002` — Dataset tipado dos 9 cursos (fase, horas, módulos, aulas reais) como fonte única de verdade.
 
 ### Fase 1 — Motor de planejamento *(o cérebro — isolado, sem UI)*
 **Bloco C · Lógica pura**
-- `SPEC-003` — Função `gerarPlano(input) → Cronograma`: cálculo de carga, alocação por módulo, datas, veredito de data-alvo.
-- `SPEC-004` — Suíte de testes do motor cobrindo os edge cases do PRD §6.
+- [x] `SPEC-003` — Função `gerarPlano(input) → Cronograma`: cálculo de carga, alocação por módulo, datas, veredito de data-alvo.
+- [ ] `SPEC-004` — Suíte de testes do motor cobrindo os edge cases do PRD §6.
 
 ### Fase 2 — Produto público (sem login)
 **Bloco D · Captura de input**
-- `SPEC-005` — Landing + Quiz de 4 perguntas (estado client, mobile-first).
+- [ ] `SPEC-005` — Landing + Quiz de 4 perguntas (estado client, mobile-first).
 
 **Bloco E · Visualização do plano**
-- `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).
-- `SPEC-007` — Progresso local pré-login (checkboxes por aula em `localStorage`).
+- [ ] `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).
+- [ ] `SPEC-007` — Progresso local pré-login (checkboxes por aula em `localStorage`).
 
 ### Fase 3 — Auth & persistência
 **Bloco F · Infra de dados**
-- `SPEC-008` — Neon + Drizzle: schema (`profile`, `plan`, `progress`) + migrations.
+- [ ] `SPEC-008` — Neon + Drizzle: schema (`profile`, `plan`, `progress`) + migrations.
 
 **Bloco G · Identidade**
-- `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.
+- [ ] `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.
 
 **Bloco H · Persistência do usuário**
-- `SPEC-010` — Lazy registration: "salvar meu plano" → cadastro → migra estado local p/ Neon.
-- `SPEC-011` — Toggle de progresso server-side + Cloudflare Turnstile no cadastro.
+- [ ] `SPEC-010` — Lazy registration: "salvar meu plano" → cadastro → migra estado local p/ Neon.
+- [ ] `SPEC-011` — Toggle de progresso server-side + Cloudflare Turnstile no cadastro.
 
 ### Fase 4 — Lead & retenção (P1)
 **Bloco I · Lead**
-- `SPEC-012` — Coleta de segmento (obrigatório) + WhatsApp/Instagram (opcional) no perfil.
-- `SPEC-014` — Admin/export de leads (view ou CSV).
+- [ ] `SPEC-012` — Coleta de segmento (obrigatório) + WhatsApp/Instagram (opcional) no perfil.
+- [ ] `SPEC-014` — Admin/export de leads (view ou CSV).
 
 **Bloco J · Engajamento**
-- `SPEC-013` — Recalcular plano preservando progresso (ancorado em `lesson_id`).
-- `SPEC-015` — Lembretes por email/WhatsApp (Brevo/Evolution) — *opcional, fast-follow.*
+- [ ] `SPEC-013` — Recalcular plano preservando progresso (ancorado em `lesson_id`).
+- [ ] `SPEC-015` — Lembretes por email/WhatsApp (Brevo/Evolution) — *opcional, fast-follow.*
 
 ---
 
