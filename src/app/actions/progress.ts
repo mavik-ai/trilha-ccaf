@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { progress } from "@/db/schema";
+import { progress, profiles } from "@/db/schema";
 import { getSession } from "@/lib/auth/server";
 import { and, eq } from "drizzle-orm";
 import { getClientIp, isRateLimited } from "./plan";
@@ -24,6 +24,20 @@ export async function toggleLessonAction(lessonId: string, completed: boolean) {
     }
 
     const userId = sessionData.user.id;
+
+    // Garante que o profile existe no banco antes de associar o progresso
+    const profileExists = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+
+    if (profileExists.length === 0) {
+      await db.insert(profiles).values({
+        id: userId,
+        segment: "Pending",
+      });
+    }
 
     if (completed) {
       // Adiciona o progresso

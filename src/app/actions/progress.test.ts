@@ -10,13 +10,19 @@ vi.mock("@/lib/auth/server", () => ({
 
 vi.mock("@/db", () => {
   const mockDelete = vi.fn().mockReturnThis();
-  const mockWhere = vi.fn().mockResolvedValue({ success: true });
+  const mockWhere = vi.fn().mockReturnThis();
   const mockInsert = vi.fn().mockReturnThis();
   const mockValues = vi.fn().mockReturnThis();
   const mockOnConflictDoNothing = vi.fn().mockResolvedValue({ success: true });
+  const mockSelect = vi.fn().mockReturnThis();
+  const mockFrom = vi.fn().mockReturnThis();
+  const mockLimit = vi.fn().mockResolvedValue([{ id: "test-uuid-user", segment: "Dev" }]);
 
   return {
     db: {
+      select: mockSelect,
+      from: mockFrom,
+      limit: mockLimit,
       delete: mockDelete,
       insert: mockInsert,
       where: mockWhere,

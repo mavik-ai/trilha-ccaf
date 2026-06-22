@@ -11,7 +11,7 @@ import { PlanProgressPanel } from "@/components/plan/progress-panel";
 import { SavePlanCTA } from "@/components/plan/save-cta";
 import { getSession } from "@/lib/auth/server";
 import { db } from "@/db";
-import { progress, profiles } from "@/db/schema";
+import { progress, profiles, plans } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 interface PageProps {
@@ -26,15 +26,79 @@ interface PageProps {
 export default async function PlanoPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
-  // Parâmetros de entrada e sanitização com fallbacks seguros
-  const hoursWeek = parseInt(params.hoursWeek || "5", 10);
-  const includeBase = params.includeBase === "true";
+  // Lê a sessão do usuário no servidor
+  const sessionRes = await getSession();
+  const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;
+  const isLoggedIn = !!sessionData?.user?.id;
+
+  // Parâmetros de entrada e sanitização com fallbacks seguros (serão atualizados se houver plano no banco)
+  let hoursWeek = parseInt(params.hoursWeek || "5", 10);
+  let includeBase = params.includeBase === "true";
   
   // Trata timezones anexando horário neutro
   const startStr = params.startDate || format(new Date(), "yyyy-MM-dd");
-  const startDate = new Date(`${startStr}T12:00:00Z`);
+  let startDate = new Date(`${startStr}T12:00:00Z`);
   
-  const targetDate = params.targetDate ? new Date(`${params.targetDate}T12:00:00Z`) : null;
+  let targetDate = params.targetDate ? new Date(`${params.targetDate}T12:00:00Z`) : null;
+
+  // Carrega o progresso, perfil e plano do banco de dados se o usuário estiver autenticado
+  let initialCompletedLessons: string[] = [];
+  let userProfile: typeof profiles.$inferSelect | null = null;
+
+  if (isLoggedIn && sessionData?.user?.id) {
+    try {
+      const [dbProgress, dbProfile, dbPlanList] = await Promise.all([
+        db
+          .select({ lessonId: progress.lessonId })
+          .from(progress)
+          .where(eq(progress.userId, sessionData.user.id)),
+        db
+          .select()
+          .from(profiles)
+          .where(eq(profiles.id, sessionData.user.id))
+          .limit(1),
+        db
+          .select()
+          .from(plans)
+          .where(eq(plans.userId, sessionData.user.id))
+          .limit(1)
+      ]);
+      
+      initialCompletedLessons = dbProgress.map((p) => p.lessonId);
+      userProfile = dbProfile[0] || null;
+
+      const dbPlan = dbPlanList[0];
+      if (dbPlan) {
+        // Hidrata com dados salvos no banco
+        hoursWeek = dbPlan.hoursWeek;
+        includeBase = dbPlan.includeBase;
+        startDate = dbPlan.startDate;
+        targetDate = dbPlan.targetDate;
+      } else {
+        // Salva de forma "lazy" os dados atuais da URL caso não exista plano
+        if (!userProfile) {
+          const inserted = await db
+            .insert(profiles)
+            .values({
+              id: sessionData.user.id,
+              segment: "Pending",
+            })
+            .returning();
+          userProfile = inserted[0] || null;
+        }
+
+        await db.insert(plans).values({
+          userId: sessionData.user.id,
+          hoursWeek,
+          includeBase,
+          startDate,
+          targetDate,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar/salvar dados do banco para a página do plano:", error);
+    }
+  }
 
   // Invoca o motor de planejamento pura
   const plano = gerarPlano({
@@ -49,37 +113,11 @@ export default async function PlanoPage({ searchParams }: PageProps) {
     w.modules.flatMap((m) => m.lessons.map((l) => l.id))
   );
 
-  // Lê a sessão do usuário no servidor
-  const sessionRes = await getSession();
-  const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;
-  const isLoggedIn = !!sessionData?.user?.id;
+  const hasMissingProfileLead = isLoggedIn && (!userProfile?.segment || userProfile.segment === "Pending");
   
-  // Carrega o progresso e perfil do banco de dados se o usuário estiver autenticado
-  let initialCompletedLessons: string[] = [];
-  let userProfile: typeof profiles.$inferSelect | null = null;
-
-  if (isLoggedIn && sessionData?.user?.id) {
-    try {
-      const [dbProgress, dbProfile] = await Promise.all([
-        db
-          .select({ lessonId: progress.lessonId })
-          .from(progress)
-          .where(eq(progress.userId, sessionData.user.id)),
-        db
-          .select()
-          .from(profiles)
-          .where(eq(profiles.id, sessionData.user.id))
-          .limit(1)
-      ]);
-      
-      initialCompletedLessons = dbProgress.map((p) => p.lessonId);
-      userProfile = dbProfile[0] || null;
-    } catch (error) {
-      console.error("Erro ao buscar dados do banco para a página do plano:", error);
-    }
-  }
-
-  const hasMissingProfileLead = isLoggedIn && !userProfile?.segment;
+  // Define permissão admin básica
+  const adminEmails = (process.env.ADMIN_EMAILS || "admin@mavik.com.br,contato@mavik.com.br").split(",");
+  const isAdmin = isLoggedIn && sessionData?.user?.email && adminEmails.includes(sessionData.user.email);
 
   return (
     <ProgressProvider
@@ -102,7 +140,7 @@ export default async function PlanoPage({ searchParams }: PageProps) {
                 className="inline-flex items-center text-xs font-mono text-muted-foreground hover:text-primary transition-colors gap-1.5 group cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                <span>Ajustar respostas</span>
+                <span>Voltar ao Quiz</span>
               </Link>
               <h1 className="text-3xl font-extrabold tracking-tight font-sans text-foreground">
                 Seu Cronograma <span className="text-primary">Trilha</span>
@@ -112,7 +150,41 @@ export default async function PlanoPage({ searchParams }: PageProps) {
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {isLoggedIn && (
+                <>
+                  {isAdmin && (
+                    <Link href="/admin">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-border bg-card/25 hover:bg-card/45 hover:border-primary/45 font-sans text-xs cursor-pointer flex items-center gap-1.5 h-9"
+                      >
+                        <span>Painel Admin</span>
+                      </Button>
+                    </Link>
+                  )}
+                  <Link href="/conta/recalcular">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-border bg-card/25 hover:bg-card/45 hover:border-primary/45 font-sans text-xs cursor-pointer flex items-center gap-1.5 h-9"
+                    >
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span>Recalcular Plano</span>
+                    </Button>
+                  </Link>
+                  <Link href="/conta/perfil">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-border bg-card/25 hover:bg-card/45 hover:border-primary/45 font-sans text-xs cursor-pointer flex items-center gap-1.5 h-9"
+                    >
+                      <span>Meu Perfil</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
               {/* Botão de Impressão PDF */}
               <Button
                 variant="outline"

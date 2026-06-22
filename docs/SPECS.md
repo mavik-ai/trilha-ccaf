@@ -236,15 +236,15 @@
 
 ---
 
-## SPEC-013 — Recalcular plano
+## SPEC-013 — Recalcular plano [CONCLUÍDO]
 **Fase 4 · Bloco J** · Depende de: 011
 
 **Objetivo:** mudar disponibilidade/data sem perder progresso.
 
 **Tasks:**
-- [ ] UI "recalcular" reusando o quiz com valores atuais.
-- [ ] Regerar `Cronograma`; atualizar `plan`.
-- [ ] Garantir que `progress` (ancorado em `lessonId`) é preservado.
+- [x] UI "recalcular" reusando o quiz com valores atuais.
+- [x] Regerar `Cronograma`; atualizar `plan`.
+- [x] Garantir que `progress` (ancorado em `lessonId`) é preservado.
 
 **Arquivos:** `src/app/conta/recalcular/*`.
 
@@ -252,15 +252,15 @@
 
 ---
 
-## SPEC-014 — Admin/export de leads
+## SPEC-014 — Admin/export de leads [CONCLUÍDO]
 **Fase 4 · Bloco I** · Depende de: 012
 
 **Objetivo:** MAVIK consultar/exportar leads.
 
 **Tasks:**
-- [ ] Rota protegida `/admin` (só role admin).
-- [ ] Listagem de `profile` + join com auth (email, segmento, contato, data).
-- [ ] Export CSV.
+- [x] Rota protegida `/admin` (só role admin).
+- [x] Listagem de `profile` + join com auth (email, segmento, contato, data).
+- [x] Export CSV.
 
 **Arquivos:** `src/app/admin/*`.
 
@@ -268,15 +268,15 @@
 
 ---
 
-## SPEC-015 — Lembretes (opcional)
+## SPEC-015 — Lembretes (opcional) [CONCLUÍDO]
 **Fase 4 · Bloco J** · Depende de: 011
 
 **Objetivo:** reengajar por email/WhatsApp no início de cada semana.
 
 **Tasks:**
-- [ ] Cron (Vercel Cron) que detecta início de semana do plano por usuário.
-- [ ] Disparo via Brevo (email) e/ou Evolution API (WhatsApp).
-- [ ] Opt-out.
+- [x] Cron (Vercel Cron) que detecta início de semana do plano por usuário.
+- [x] Disparo via Brevo (email) e/ou Evolution API (WhatsApp).
+- [x] Opt-out.
 
 **Arquivos:** `src/app/api/cron/reminders/route.ts`, `src/lib/notify/*`.
 

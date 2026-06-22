@@ -15,17 +15,57 @@ import { cn } from "@/lib/utils";
 const DATA_HOJE = new Date();
 const DATA_AMANHA = new Date(DATA_HOJE.getTime() + 24 * 60 * 60 * 1000);
 
-export function QuizContainer() {
+interface QuizContainerProps {
+  initialHoursWeek?: number;
+  initialIncludeBase?: boolean;
+  initialStartDate?: Date;
+  initialTargetDate?: Date | null;
+  onFinish?: (data: {
+    hoursWeek: number;
+    includeBase: boolean;
+    startDate: Date;
+    targetDate: Date | null;
+  }) => void;
+}
+
+export function QuizContainer({
+  initialHoursWeek = 5,
+  initialIncludeBase = false,
+  initialStartDate,
+  initialTargetDate,
+  onFinish,
+}: QuizContainerProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
-  // Estados do Quiz
-  const [hoursWeek, setHoursWeek] = useState<number>(5);
-  const [includeBase, setIncludeBase] = useState<boolean>(false);
-  const [startType, setStartType] = useState<"today" | "tomorrow" | "custom">("today");
-  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(new Date());
-  const [targetType, setTargetType] = useState<"none" | "custom">("none");
-  const [customTargetDate, setCustomTargetDate] = useState<Date | undefined>(undefined);
+  // Estados do Quiz inicializados opcionalmente com preferências existentes
+  const [hoursWeek, setHoursWeek] = useState<number>(initialHoursWeek);
+  const [includeBase, setIncludeBase] = useState<boolean>(initialIncludeBase);
+  
+  // Trata o tipo de início baseado no valor inicial fornecido
+  const [startType, setStartType] = useState<"today" | "tomorrow" | "custom">(() => {
+    if (!initialStartDate) return "today";
+    
+    const todayStr = DATA_HOJE.toISOString().split("T")[0];
+    const tomorrowStr = DATA_AMANHA.toISOString().split("T")[0];
+    const initialStr = initialStartDate.toISOString().split("T")[0];
+
+    if (initialStr === todayStr) return "today";
+    if (initialStr === tomorrowStr) return "tomorrow";
+    return "custom";
+  });
+  
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(
+    initialStartDate || new Date()
+  );
+
+  // Trata o prazo alvo inicial
+  const [targetType, setTargetType] = useState<"none" | "custom">(() => {
+    return initialTargetDate ? "custom" : "none";
+  });
+  const [customTargetDate, setCustomTargetDate] = useState<Date | undefined>(
+    initialTargetDate || undefined
+  );
 
   // Erros de validação
   const [dateError, setDateError] = useState<string | null>(null);
@@ -74,13 +114,26 @@ export function QuizContainer() {
 
   const handleFinish = () => {
     const start = getStartDate();
+    const target = targetType === "custom" && customTargetDate ? customTargetDate : null;
+
+    // Se houver um callback onFinish customizado (como no recálculo), delega para ele
+    if (onFinish) {
+      onFinish({
+        hoursWeek,
+        includeBase,
+        startDate: start,
+        targetDate: target,
+      });
+      return;
+    }
+
     const params = new URLSearchParams();
     params.set("hoursWeek", hoursWeek.toString());
     params.set("includeBase", includeBase.toString());
     params.set("startDate", start.toISOString().split("T")[0]);
     
-    if (targetType === "custom" && customTargetDate) {
-      params.set("targetDate", customTargetDate.toISOString().split("T")[0]);
+    if (target) {
+      params.set("targetDate", target.toISOString().split("T")[0]);
     }
 
     // Navega para a tela do cronograma passando as respostas
@@ -131,9 +184,10 @@ export function QuizContainer() {
               ].map((opt) => (
                 <button
                   key={opt.value}
+                  type="button"
                   onClick={() => setHoursWeek(opt.value)}
                   className={cn(
-                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between",
+                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer",
                     hoursWeek === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-transparent hover:border-primary/40 text-muted-foreground"
@@ -186,9 +240,10 @@ export function QuizContainer() {
               ].map((opt) => (
                 <button
                   key={opt.value.toString()}
+                  type="button"
                   onClick={() => setIncludeBase(opt.value)}
                   className={cn(
-                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between",
+                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer",
                     includeBase === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-transparent hover:border-primary/40 text-muted-foreground"
@@ -238,9 +293,10 @@ export function QuizContainer() {
               ].map((opt) => (
                 <button
                   key={opt.value}
+                  type="button"
                   onClick={() => setStartType(opt.value as "today" | "tomorrow" | "custom")}
                   className={cn(
-                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between",
+                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer",
                     startType === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-transparent hover:border-primary/40 text-muted-foreground"
@@ -316,9 +372,10 @@ export function QuizContainer() {
               ].map((opt) => (
                 <button
                   key={opt.value}
+                  type="button"
                   onClick={() => setTargetType(opt.value as "none" | "custom")}
                   className={cn(
-                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between",
+                    "text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer",
                     targetType === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "border-border bg-transparent hover:border-primary/40 text-muted-foreground"
@@ -378,6 +435,7 @@ export function QuizContainer() {
       <div className="flex items-center justify-between border-t border-border/30 pt-6 mt-8">
         <Button
           variant="ghost"
+          type="button"
           onClick={handleBack}
           disabled={step === 1}
           className="text-muted-foreground hover:text-foreground font-sans"
@@ -386,8 +444,9 @@ export function QuizContainer() {
           Voltar
         </Button>
         <Button
+          type="button"
           onClick={handleNext}
-          className="bg-primary text-primary-foreground hover:bg-primary/95 font-semibold font-sans px-5"
+          className="bg-primary text-primary-foreground hover:bg-primary/95 font-semibold font-sans px-5 cursor-pointer"
         >
           {step === 4 ? "Gerar Cronograma" : "Avançar"}
           <ArrowRight className="w-4 h-4 ml-2" />

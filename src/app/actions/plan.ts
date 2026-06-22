@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { plans, progress } from "@/db/schema";
+import { plans, progress, profiles } from "@/db/schema";
 import { getSession } from "@/lib/auth/server";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -116,6 +116,20 @@ export async function savePlanAction(input: SavePlanInput) {
 
     const userId = sessionData.user.id;
 
+    // Garante que o profile existe no banco antes de associar o plano
+    const profileExists = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+
+    if (profileExists.length === 0) {
+      await db.insert(profiles).values({
+        id: userId,
+        segment: "Pending",
+      });
+    }
+
     // Remove qualquer plano anterior do usuário
     await db.delete(plans).where(eq(plans.userId, userId));
 
@@ -157,6 +171,20 @@ export async function syncLocalProgressAction(lessonIds: string[]) {
     }
 
     const userId = sessionData.user.id;
+
+    // Garante que o profile existe no banco antes de associar o progresso
+    const profileExists = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+
+    if (profileExists.length === 0) {
+      await db.insert(profiles).values({
+        id: userId,
+        segment: "Pending",
+      });
+    }
 
     const values = lessonIds.map((lessonId) => ({
       userId,
