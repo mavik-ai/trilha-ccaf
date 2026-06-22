@@ -166,16 +166,16 @@
 
 ---
 
-## SPEC-009 — Neon Auth
+## SPEC-009 — Neon Auth [CONCLUÍDO]
 **Fase 3 · Bloco G** · Depende de: 008
 
 **Objetivo:** login por email (magic link) e Google.
 
 **Tasks:**
-- [ ] Habilitar Neon Auth no console (Better Auth) + env vars.
-- [ ] `createNeonAuth()` server + `createAuthClient()` client.
-- [ ] Páginas `/auth/sign-in` e `/auth/sign-up` (AuthView).
-- [ ] Middleware protegendo `/conta` (não o `/plano`, que é público).
+- [x] Habilitar Neon Auth no console (Better Auth) + env vars.
+- [x] `createNeonAuth()` server + `createAuthClient()` client.
+- [x] Páginas `/auth/sign-in` e `/auth/sign-up` (AuthView).
+- [x] Middleware protegendo `/conta` (não o `/plano`, que é público).
 
 **Arquivos:** `src/lib/auth/*`, `src/app/auth/*`, `middleware.ts`.
 

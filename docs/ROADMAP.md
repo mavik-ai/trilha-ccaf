@@ -53,7 +53,7 @@
 - [x] `SPEC-008` — Neon + Drizzle: schema (`profile`, `plan`, `progress`) + migrations.
 
 **Bloco G · Identidade**
-- [ ] `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.
+- [x] `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.
 
 **Bloco H · Persistência do usuário**
 - [ ] `SPEC-010` — Lazy registration: "salvar meu plano" → cadastro → migra estado local p/ Neon.
