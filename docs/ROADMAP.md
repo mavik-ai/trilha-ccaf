@@ -42,7 +42,7 @@
 
 ### Fase 2 — Produto público (sem login)
 **Bloco D · Captura de input**
-- [ ] `SPEC-005` — Landing + Quiz de 4 perguntas (estado client, mobile-first).
+- [x] `SPEC-005` — Landing + Quiz de 4 perguntas (estado client, mobile-first).
 
 **Bloco E · Visualização do plano**
 - [ ] `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).

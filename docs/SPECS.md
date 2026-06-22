@@ -94,16 +94,16 @@
 
 ---
 
-## SPEC-005 — Landing + Quiz
+## SPEC-005 — Landing + Quiz [CONCLUÍDO]
 **Fase 2 · Bloco D** · Depende de: 004
 
 **Objetivo:** captar os 4 inputs e disparar a geração, mobile-first, sem login.
 
 **Tasks:**
-- [ ] Landing curta com proposta de valor + CTA "Montar meu plano".
-- [ ] Quiz 4 passos: horas/semana (3/5/8/10+), nível (base sim/não), início (hoje/amanhã/data), data-alvo (não/data).
-- [ ] Estado em client (sem persistência ainda); validação de datas.
-- [ ] Ao concluir → chama `gerarPlano` e navega para `/plano` com o resultado.
+- [x] Landing curta com proposta de valor + CTA "Montar meu plano".
+- [x] Quiz 4 passos: horas/semana (3/5/8/10+), nível (base sim/não), início (hoje/amanhã/data), data-alvo (não/data).
+- [x] Estado em client (sem persistência ainda); validação de datas.
+- [x] Ao concluir → chama `gerarPlano` e navega para `/plano` com o resultado.
 
 **Arquivos:** `src/app/page.tsx`, `src/components/quiz/*`.
 
