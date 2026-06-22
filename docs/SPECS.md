@@ -219,15 +219,15 @@
 
 ---
 
-## SPEC-012 — Captura de lead
+## SPEC-012 — Captura de lead [CONCLUÍDO]
 **Fase 4 · Bloco I** · Depende de: 011
 
 **Objetivo:** coletar dados de negócio no cadastro/perfil.
 
 **Tasks:**
-- [ ] Campo segmento (dropdown, obrigatório) na criação de conta.
-- [ ] WhatsApp e Instagram (opcionais) no perfil.
-- [ ] Gravar em `profile`; validação leve de formato.
+- [x] Campo segmento (dropdown, obrigatório) na criação de conta.
+- [x] WhatsApp e Instagram (opcionais) no perfil.
+- [x] Gravar em `profile`; validação leve de formato.
 - [ ] *(Decisão pendente: WhatsApp opcional vs obrigatório — ver PRD §13.)*
 
 **Arquivos:** `src/app/conta/perfil/*`, `src/app/actions/profile.ts`.

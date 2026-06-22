@@ -61,7 +61,7 @@
 
 ### Fase 4 — Lead & retenção (P1)
 **Bloco I · Lead**
-- [ ] `SPEC-012` — Coleta de segmento (obrigatório) + WhatsApp/Instagram (opcional) no perfil.
+- [x] `SPEC-012` — Coleta de segmento (obrigatório) + WhatsApp/Instagram (opcional) no perfil.
 - [ ] `SPEC-014` — Admin/export de leads (view ou CSV).
 
 **Bloco J · Engajamento**

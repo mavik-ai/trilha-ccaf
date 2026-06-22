@@ -11,7 +11,7 @@ import { PlanProgressPanel } from "@/components/plan/progress-panel";
 import { SavePlanCTA } from "@/components/plan/save-cta";
 import { getSession } from "@/lib/auth/server";
 import { db } from "@/db";
-import { progress } from "@/db/schema";
+import { progress, profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 interface PageProps {
@@ -54,19 +54,32 @@ export default async function PlanoPage({ searchParams }: PageProps) {
   const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;
   const isLoggedIn = !!sessionData?.user?.id;
   
-  // Carrega o progresso inicial do banco de dados se o usuário estiver autenticado
+  // Carrega o progresso e perfil do banco de dados se o usuário estiver autenticado
   let initialCompletedLessons: string[] = [];
+  let userProfile: typeof profiles.$inferSelect | null = null;
+
   if (isLoggedIn && sessionData?.user?.id) {
     try {
-      const dbProgress = await db
-        .select({ lessonId: progress.lessonId })
-        .from(progress)
-        .where(eq(progress.userId, sessionData.user.id));
+      const [dbProgress, dbProfile] = await Promise.all([
+        db
+          .select({ lessonId: progress.lessonId })
+          .from(progress)
+          .where(eq(progress.userId, sessionData.user.id)),
+        db
+          .select()
+          .from(profiles)
+          .where(eq(profiles.id, sessionData.user.id))
+          .limit(1)
+      ]);
+      
       initialCompletedLessons = dbProgress.map((p) => p.lessonId);
+      userProfile = dbProfile[0] || null;
     } catch (error) {
-      console.error("Erro ao buscar progresso do banco para a página do plano:", error);
+      console.error("Erro ao buscar dados do banco para a página do plano:", error);
     }
   }
+
+  const hasMissingProfileLead = isLoggedIn && !userProfile?.segment;
 
   return (
     <ProgressProvider
@@ -122,6 +135,23 @@ export default async function PlanoPage({ searchParams }: PageProps) {
               Gerado em: {format(new Date(), "PPP", { locale: ptBR })} | Disponibilidade: {hoursWeek}h/semana
             </p>
           </div>
+
+          {/* Banner de Preenchimento Obrigatório de Perfil (Lead Capture) */}
+          {hasMissingProfileLead && (
+            <div className="bg-primary/10 border border-primary text-foreground rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse print:hidden">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+                <p className="text-xs sm:text-sm font-sans">
+                  <strong>Ação necessária:</strong> Selecione seu segmento profissional para garantir a sincronização em nuvem do seu cronograma.
+                </p>
+              </div>
+              <Link href="/conta/perfil">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-background font-sans font-bold whitespace-nowrap cursor-pointer">
+                  Completar Perfil
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* Banner do Veredito da Data-Alvo */}
           <PlanVerdictBanner
