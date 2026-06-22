@@ -50,7 +50,7 @@
 
 ### Fase 3 — Auth & persistência
 **Bloco F · Infra de dados**
-- [ ] `SPEC-008` — Neon + Drizzle: schema (`profile`, `plan`, `progress`) + migrations.
+- [x] `SPEC-008` — Neon + Drizzle: schema (`profile`, `plan`, `progress`) + migrations.
 
 **Bloco G · Identidade**
 - [ ] `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.

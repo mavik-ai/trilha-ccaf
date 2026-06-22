@@ -149,16 +149,16 @@
 
 ---
 
-## SPEC-008 — Neon + schema (Drizzle)
+## SPEC-008 — Neon + schema (Drizzle) [CONCLUÍDO]
 **Fase 3 · Bloco F** · Depende de: 007
 
 **Objetivo:** banco pronto com as 3 tabelas do PRD §10.
 
 **Tasks:**
-- [ ] Projeto Neon (região AWS, p/ Neon Auth) + `DATABASE_URL`.
-- [ ] Drizzle: tabelas `profile`, `plan`, `progress` (FK p/ `neon_auth.users_sync`).
-- [ ] Migrations versionadas + script de migrate.
-- [ ] Driver serverless (`@neondatabase/serverless`) no client.
+- [x] Projeto Neon (região AWS, p/ Neon Auth) + `DATABASE_URL`.
+- [x] Drizzle: tabelas `profile`, `plan`, `progress` (FK p/ `neon_auth.users_sync`).
+- [x] Migrations versionadas + script de migrate.
+- [x] Driver serverless (`@neondatabase/serverless`) no client.
 
 **Arquivos:** `src/db/schema.ts`, `drizzle.config.ts`, `src/db/index.ts`.
 
