@@ -20,3 +20,37 @@ export interface Course {
   approx?: boolean;    // Indica se a grade foi aproximada por tópicos
   modules: Module[];
 }
+
+export interface PlanInput {
+  hoursWeek: number;      // 3, 5, 8, 10, etc.
+  includeBase: boolean;
+  startDate: Date;
+  targetDate?: Date | null;
+}
+
+export interface PlanWeekModule {
+  courseId: string;
+  courseName: string;
+  moduleId: string;
+  moduleName: string;
+  lessons: Lesson[];
+  estimatedHours: number;
+}
+
+export interface PlanWeek {
+  index: number;         // 1-based (Semana 1, Semana 2...)
+  startDate: Date;
+  endDate: Date;
+  modules: PlanWeekModule[];
+  hours: number;
+  highWeight: boolean;   // true se contiver cursos de Fase 3 ou 4
+}
+
+export type PlanVerdict = "FOLGADO" | "NO LIMITE" | "INVIÁVEL";
+
+export interface PlanResult {
+  weeks: PlanWeek[];
+  verdict: PlanVerdict;
+  requiredHoursWeek?: number; // Carga horária ideal recomendada se for inviável
+  endDate: Date;
+}
