@@ -5,18 +5,18 @@
 
 ---
 
-## SPEC-001 — Scaffold do projeto
+## SPEC-001 — Scaffold do projeto [CONCLUÍDO]
 **Fase 0 · Bloco A** · Depende de: —
 
 **Objetivo:** repositório Next.js rodando local e na Vercel, vazio mas com fundação correta.
 
 **Tasks:**
-- [ ] `create-next-app` com App Router, TypeScript, Tailwind, ESLint, src dir.
-- [ ] Instalar e inicializar shadcn/ui; adicionar Urbanist + JetBrains Mono.
-- [ ] Definir tokens MAVIK no Tailwind (preto, surface, border, lime #F1FD44).
-- [ ] Estrutura: `src/app`, `src/components`, `src/lib`, `src/data`, `docs/`.
-- [ ] `.env.example` com placeholders (DATABASE_URL, NEON_AUTH_*, TURNSTILE_*).
-- [ ] Deploy inicial na Vercel (página "em construção").
+- [x] `create-next-app` com App Router, TypeScript, Tailwind, ESLint, src dir.
+- [x] Instalar e inicializar shadcn/ui; adicionar Urbanist + JetBrains Mono.
+- [x] Definir tokens MAVIK no Tailwind (preto, surface, border, lime #F1FD44).
+- [x] Estrutura: `src/app`, `src/components`, `src/lib`, `src/data`, `docs/`.
+- [x] `.env.example` com placeholders (DATABASE_URL, NEON_AUTH_*, TURNSTILE_*).
+- [x] Deploy inicial na Vercel (página "em construção").
 
 **Arquivos:** `package.json`, `tailwind.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `.env.example`.
 
@@ -28,16 +28,16 @@
 
 ---
 
-## SPEC-002 — Dataset de cursos (fonte de verdade)
+## SPEC-002 — Dataset de cursos (fonte de verdade) [CONCLUÍDO]
 **Fase 0 · Bloco B** · Depende de: 001
 
 **Objetivo:** os 9 cursos como dado tipado e único, consumido pelo motor e pela UI.
 
 **Tasks:**
-- [ ] Tipos `Course`, `Module`, `Lesson` (id estável `curso_modulo_aula`).
-- [ ] Campos por curso: `id, name, url, phase(0-4), hours, domainTag, optionalBase(bool), modules[]`.
-- [ ] Popular com a grade real já levantada (Claude 101 14 · AI Fluency 15 · API 85 · Platform 101 14 · Code in Action 21 · MCP 14 · Subagents 4; Agent Skills e MCP Advanced por tópico, flag `approx`).
-- [ ] Função `totalHours(includeBase)` e `coursesFor(includeBase)`.
+- [x] Tipos `Course`, `Module`, `Lesson` (id estável `curso_modulo_aula`).
+- [x] Campos por curso: `id, name, url, phase(0-4), hours, domainTag, optionalBase(bool), modules[]`.
+- [x] Popular com a grade real já levantada (Claude 101 14 · AI Fluency 15 · API 85 · Platform 101 14 · Code in Action 21 · MCP 14 · Subagents 4; Agent Skills e MCP Advanced por tópico, flag `approx`).
+- [x] Função `totalHours(includeBase)` e `coursesFor(includeBase)`.
 
 **Arquivos:** `src/data/courses.ts`, `src/lib/types.ts`.
 
@@ -50,19 +50,19 @@
 
 ---
 
-## SPEC-003 — Motor `gerarPlano()`
+## SPEC-003 — Motor `gerarPlano()` [CONCLUÍDO]
 **Fase 1 · Bloco C** · Depende de: 002
 
 **Objetivo:** função pura que transforma input do quiz em cronograma datado. Sem React, sem I/O.
 
 **Tasks:**
-- [ ] Tipos `PlanInput { hoursWeek, includeBase, startDate, targetDate? }` e `Cronograma { weeks[], verdict, endDate }`.
-- [ ] Calcular `totalHours` via dataset.
-- [ ] `weeksNeeded = ceil(total / hoursWeek)`.
-- [ ] Alocação: percorre cursos em ordem de fase, enche cada semana até a cota; **quebra só em fronteira de módulo** (nunca no meio de módulo).
-- [ ] Carimbar datas: `week[i].start = startDate + i*7`, `end = start + 6`.
-- [ ] Veredito de data-alvo: folgado / no limite (≤1.2×) / inviável + ritmo necessário sugerido.
-- [ ] Marcar semanas de Fase 3/4 como "alto peso no exame".
+- [x] Tipos `PlanInput { hoursWeek, includeBase, startDate, targetDate? }` e `Cronograma { weeks[], verdict, endDate }`.
+- [x] Calcular `totalHours` via dataset.
+- [x] `weeksNeeded = ceil(total / hoursWeek)`.
+- [x] Alocação: percorre cursos em ordem de fase, enche cada semana até a cota; **quebra só em fronteira de módulo** (nunca no meio de módulo).
+- [x] Carimbar datas: `week[i].start = startDate + i*7`, `end = start + 6`.
+- [x] Veredito de data-alvo: folgado / no limite (≤1.2×) / inviável + ritmo necessário sugerido.
+- [x] Marcar semanas de Fase 3/4 como "alto peso no exame".
 
 **Arquivos:** `src/lib/planner.ts`, `src/lib/types.ts`.
 
