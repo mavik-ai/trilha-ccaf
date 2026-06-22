@@ -131,15 +131,15 @@
 
 ---
 
-## SPEC-007 — Progresso local (pré-login)
+## SPEC-007 — Progresso local (pré-login) [CONCLUÍDO]
 **Fase 2 · Bloco E** · Depende de: 006
 
 **Objetivo:** marcar aulas e ver progresso antes de existir conta.
 
 **Tasks:**
-- [ ] Checkbox por aula (estrutura do tracker atual, 179 aulas).
-- [ ] Barra geral + por semana.
-- [ ] Persistir em `localStorage` (chave versionada) com try/catch.
+- [x] Checkbox por aula (estrutura do tracker atual, 179 aulas).
+- [x] Barra geral + por semana.
+- [x] Persistir em `localStorage` (chave versionada) com try/catch.
 
 **Arquivos:** `src/components/plan/lesson-checklist.tsx`, `src/lib/local-progress.ts`.
 

@@ -1,8 +1,12 @@
+"use client";
+
 import { PlanWeek } from "@/lib/types";
 import { courses as allCourses } from "@/data/courses";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ExternalLink, Clock, BadgeAlert } from "lucide-react";
+import { ExternalLink, Clock, BadgeAlert, CheckCircle2 } from "lucide-react";
+import { useProgress } from "./progress-context";
+import { LessonChecklist } from "./lesson-checklist";
 
 interface PlanWeekCardProps {
   week: PlanWeek;
@@ -22,6 +26,8 @@ interface GroupedCourse {
 }
 
 export function PlanWeekCard({ week }: PlanWeekCardProps) {
+  const { getWeekPercentage } = useProgress();
+
   // Agrupa os módulos da semana por curso para exibição limpa
   const coursesMap = new Map<string, GroupedCourse>();
   
@@ -54,24 +60,51 @@ export function PlanWeekCard({ week }: PlanWeekCardProps) {
     { locale: ptBR }
   )}`;
 
+  // Coleta todos os IDs de lições desta semana para calcular a porcentagem
+  const weekLessonIds = week.modules.flatMap((m) => m.lessons.map((l) => l.id));
+  const weekPercentage = getWeekPercentage(weekLessonIds);
+
   return (
-    <div className="w-full bg-card/25 backdrop-blur-sm border border-border rounded-xl p-5 sm:p-6 hover:border-primary/20 transition-all duration-300 flex flex-col gap-6 shadow-md hover:shadow-xl group">
+    <div className="w-full bg-card/25 backdrop-blur-sm border border-border rounded-xl p-5 sm:p-6 hover:border-primary/20 transition-all duration-300 flex flex-col gap-6 shadow-md hover:shadow-xl group relative overflow-hidden">
       
+      {/* Indicador de progresso de borda superior */}
+      <div
+        className="absolute top-0 left-0 h-[2px] bg-primary transition-all duration-500 ease-out"
+        style={{ width: `${weekPercentage}%` }}
+      />
+
       {/* Cabeçalho da Semana */}
-      <div className="flex items-start justify-between border-b border-border/20 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/20 pb-4">
         <div className="space-y-1">
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight font-sans text-foreground group-hover:text-primary transition-colors">
-            Semana {week.index}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight font-sans text-foreground group-hover:text-primary transition-colors">
+              Semana {week.index}
+            </h2>
+            {weekPercentage === 100 && (
+              <CheckCircle2 className="w-4 h-4 text-primary animate-bounce" />
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-muted-foreground font-sans uppercase tracking-wide">
             {dateRangeStr}
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+          {/* Barra de Progresso da Semana */}
+          <div className="flex items-center gap-2 bg-muted/20 border border-border/30 rounded-lg px-2.5 py-1 text-xs">
+            <span className="text-muted-foreground font-sans">Progresso:</span>
+            <div className="w-16 sm:w-20 bg-muted/65 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-primary h-full transition-all duration-500 ease-out"
+                style={{ width: `${weekPercentage}%` }}
+              />
+            </div>
+            <span className="font-mono text-foreground font-bold">{weekPercentage}%</span>
+          </div>
+
           {/* Badge de Alta Importância */}
           {week.highWeight && (
-            <div className="inline-flex items-center gap-1 bg-primary text-primary-foreground font-mono text-[9px] font-extrabold tracking-wider px-2 py-0.5 rounded-md uppercase border border-primary/20 animate-pulse">
+            <div className="inline-flex items-center gap-1 bg-primary text-primary-foreground font-mono text-[9px] font-extrabold tracking-wider px-2 py-1 rounded-md uppercase border border-primary/20">
               <BadgeAlert className="w-3 h-3" />
               <span>Alto Peso</span>
             </div>
@@ -127,16 +160,11 @@ export function PlanWeekCard({ week }: PlanWeekCardProps) {
                   {/* Aulas do Módulo */}
                   <ul className="space-y-1.5 pl-1.5">
                     {m.lessons.map((lesson) => (
-                      <li
+                      <LessonChecklist
                         key={lesson.id}
-                        className="text-xs sm:text-sm text-muted-foreground hover:text-foreground font-sans flex items-start gap-2.5 transition-colors duration-150 py-0.5"
-                      >
-                        {/* Indicador de Lição provisório (no SPEC-007 vira checkbox) */}
-                        <div className="w-4 h-4 rounded border border-border/50 flex-shrink-0 mt-0.5 bg-card/10 flex items-center justify-center font-mono text-[9px] text-muted-foreground/60 select-none">
-                          •
-                        </div>
-                        <span className="leading-snug">{lesson.name}</span>
-                      </li>
+                        lessonId={lesson.id}
+                        lessonName={lesson.name}
+                      />
                     ))}
                   </ul>
                 </div>

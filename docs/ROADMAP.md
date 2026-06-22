@@ -46,7 +46,7 @@
 
 **Bloco E · Visualização do plano**
 - [x] `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).
-- [ ] `SPEC-007` — Progresso local pré-login (checkboxes por aula em `localStorage`).
+- [x] `SPEC-007` — Progresso local pré-login (checkboxes por aula em `localStorage`).
 
 ### Fase 3 — Auth & persistência
 **Bloco F · Infra de dados**
