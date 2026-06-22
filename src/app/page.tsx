@@ -20,6 +20,14 @@ export default function Home() {
             Seu planejador de estudos pessoal e datado para a certificação oficial 
             <span className="text-foreground font-semibold"> Claude Certified Architect (Associate)</span> da Anthropic.
           </p>
+          
+          {/* Estatística de Impacto & Motivação */}
+          <div className="mt-2 text-xs sm:text-sm text-primary/95 font-mono tracking-wide max-w-md mx-auto flex flex-col gap-1.5 border border-primary/20 bg-primary/5 rounded-lg px-4 py-3">
+            <p>🇧🇷 Menos de 0.1% dos profissionais de tecnologia no Brasil possuem esta credencial.</p>
+            <p className="text-muted-foreground italic font-sans text-xs">
+              {"\"Seja um dos pioneiros. O mercado recompensa quem constrói o futuro primeiro.\""}
+            </p>
+          </div>
         </div>
 
         {/* Simulador de Terminal MAVIK */}
