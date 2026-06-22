@@ -185,16 +185,16 @@
 
 ---
 
-## SPEC-010 — Lazy registration + salvar plano
+## SPEC-010 — Lazy registration + salvar plano [CONCLUÍDO]
 **Fase 3 · Bloco H** · Depende de: 009
 
 **Objetivo:** transformar visitante em usuário no pico de valor, sem perder estado.
 
 **Tasks:**
-- [ ] CTA "salvar meu plano" no `/plano`.
-- [ ] Fluxo: cadastro → grava `plan` + migra checks do `localStorage` p/ `progress`.
-- [ ] Server Action `savePlan(input)` e `importLocalProgress(map)`.
-- [ ] Pós-login, `/plano` hidrata do Neon.
+- [x] CTA "salvar meu plano" no `/plano`.
+- [x] Fluxo: cadastro → grava `plan` + migra checks do `localStorage` p/ `progress`.
+- [x] Server Action `savePlan(input)` e `importLocalProgress(map)`.
+- [x] Pós-login, `/plano` hidrata do Neon.
 
 **Arquivos:** `src/app/actions/plan.ts`, `src/components/plan/save-cta.tsx`.
 

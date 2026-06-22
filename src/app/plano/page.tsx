@@ -8,6 +8,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ProgressProvider } from "@/components/plan/progress-context";
 import { PlanProgressPanel } from "@/components/plan/progress-panel";
+import { SavePlanCTA } from "@/components/plan/save-cta";
+import { getSession } from "@/lib/auth/server";
+import { db } from "@/db";
+import { progress } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 interface PageProps {
   searchParams: Promise<{
@@ -44,8 +49,31 @@ export default async function PlanoPage({ searchParams }: PageProps) {
     w.modules.flatMap((m) => m.lessons.map((l) => l.id))
   );
 
+  // Lê a sessão do usuário no servidor
+  const sessionRes = await getSession();
+  const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;
+  const isLoggedIn = !!sessionData?.user?.id;
+  
+  // Carrega o progresso inicial do banco de dados se o usuário estiver autenticado
+  let initialCompletedLessons: string[] = [];
+  if (isLoggedIn && sessionData?.user?.id) {
+    try {
+      const dbProgress = await db
+        .select({ lessonId: progress.lessonId })
+        .from(progress)
+        .where(eq(progress.userId, sessionData.user.id));
+      initialCompletedLessons = dbProgress.map((p) => p.lessonId);
+    } catch (error) {
+      console.error("Erro ao buscar progresso do banco para a página do plano:", error);
+    }
+  }
+
   return (
-    <ProgressProvider allPlanLessonIds={allPlanLessonIds}>
+    <ProgressProvider
+      allPlanLessonIds={allPlanLessonIds}
+      isLoggedIn={isLoggedIn}
+      initialCompletedLessons={initialCompletedLessons}
+    >
       <main className="min-h-screen bg-background text-foreground py-10 px-4 sm:px-6 relative overflow-hidden font-sans select-none print:py-0 print:px-0">
         
         {/* Luz de fundo sutil (oculto na impressão) */}
@@ -132,6 +160,11 @@ export default async function PlanoPage({ searchParams }: PageProps) {
             {plano.weeks.map((week) => (
               <PlanWeekCard key={week.index} week={week} />
             ))}
+          </div>
+
+          {/* Chamada para Ação para Salvar Cronograma */}
+          <div className="print:hidden">
+            <SavePlanCTA />
           </div>
 
           {/* Rodapé do Plano (oculto na impressão) */}

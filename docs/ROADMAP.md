@@ -56,7 +56,7 @@
 - [x] `SPEC-009` — Neon Auth (email magic link + Google OAuth) + middleware de rotas protegidas.
 
 **Bloco H · Persistência do usuário**
-- [ ] `SPEC-010` — Lazy registration: "salvar meu plano" → cadastro → migra estado local p/ Neon.
+- [x] `SPEC-010` — Lazy registration: "salvar meu plano" → cadastro → migra estado local p/ Neon.
 - [ ] `SPEC-011` — Toggle de progresso server-side + Cloudflare Turnstile no cadastro.
 
 ### Fase 4 — Lead & retenção (P1)

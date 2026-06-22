@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getLocalProgress, toggleLocalProgress } from "@/lib/local-progress";
+import { syncLocalProgressAction } from "@/app/actions/plan";
+import { toggleLessonAction } from "@/app/actions/progress";
 
 interface ProgressContextType {
   completedLessons: string[];
@@ -16,29 +18,97 @@ const ProgressContext = createContext<ProgressContextType | undefined>(undefined
 interface ProgressProviderProps {
   children: React.ReactNode;
   allPlanLessonIds: string[];
+  isLoggedIn: boolean;
+  initialCompletedLessons: string[];
 }
 
-export function ProgressProvider({ children, allPlanLessonIds }: ProgressProviderProps) {
+export function ProgressProvider({
+  children,
+  allPlanLessonIds,
+  isLoggedIn,
+  initialCompletedLessons,
+}: ProgressProviderProps) {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Carrega o progresso inicial apenas após a montagem no cliente para evitar erros de hidratação (SSR)
+  // Carrega e sincroniza o progresso inicial após a montagem no cliente para evitar erros de hidratação (SSR)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCompletedLessons(getLocalProgress());
-    setIsLoaded(true);
-  }, []);
+    async function initializeProgress() {
+      if (isLoggedIn) {
+        const localProgress = getLocalProgress();
+        
+        if (localProgress.length > 0) {
+          try {
+            // Sincroniza o progresso anônimo do localStorage com o banco Neon
+            await syncLocalProgressAction(localProgress);
+            
+            // Limpa o localStorage para evitar sincronizações duplicadas
+            window.localStorage.removeItem("trilha_progress_v1");
+            
+            // Mescla o progresso existente no banco com o progresso que estava salvo no localStorage
+            const merged = Array.from(new Set([...initialCompletedLessons, ...localProgress]));
+            setCompletedLessons(merged);
+          } catch (error) {
+            console.error("Erro ao sincronizar progresso local pós-login:", error);
+            setCompletedLessons(initialCompletedLessons);
+          }
+        } else {
+          setCompletedLessons(initialCompletedLessons);
+        }
+      } else {
+        // Usuário anônimo carrega estritamente do localStorage
+        setCompletedLessons(getLocalProgress());
+      }
+      setIsLoaded(true);
+    }
 
-  const toggleLesson = (lessonId: string) => {
-    const nextCompleted = toggleLocalProgress(lessonId);
-    setCompletedLessons(nextCompleted);
+    initializeProgress();
+  }, [isLoggedIn, initialCompletedLessons]);
+
+  const toggleLesson = async (lessonId: string) => {
+    const isCurrentlyCompleted = completedLessons.includes(lessonId);
+    const nextCompletedState = !isCurrentlyCompleted;
+
+    // Atualização otimista (Optimistic UI) para feedback visual imediato
+    if (nextCompletedState) {
+      setCompletedLessons((prev) => [...prev, lessonId]);
+    } else {
+      setCompletedLessons((prev) => prev.filter((id) => id !== lessonId));
+    }
+
+    try {
+      if (isLoggedIn) {
+        // Salva diretamente no Neon
+        const res = await toggleLessonAction(lessonId, nextCompletedState);
+        if (res?.error) {
+          console.error("Erro ao alternar progresso no servidor:", res.error);
+          // Reverte o estado em caso de erro no servidor
+          if (isCurrentlyCompleted) {
+            setCompletedLessons((prev) => [...prev, lessonId]);
+          } else {
+            setCompletedLessons((prev) => prev.filter((id) => id !== lessonId));
+          }
+        }
+      } else {
+        // Salva localmente no localStorage
+        toggleLocalProgress(lessonId);
+      }
+    } catch (error) {
+      console.error("Erro ao alternar progresso da aula:", error);
+      // Reverte em caso de exceção de rede
+      if (isCurrentlyCompleted) {
+        setCompletedLessons((prev) => [...prev, lessonId]);
+      } else {
+        setCompletedLessons((prev) => prev.filter((id) => id !== lessonId));
+      }
+    }
   };
 
   const isCompleted = (lessonId: string) => {
     return completedLessons.includes(lessonId);
   };
 
-  // Filtra as aulas concluídas que de fato pertencem ao plano atual para calcular a porcentagem correta
+  // Filtra as aulas concluídas que pertencem ao plano atual
   const activeCompletedCount = allPlanLessonIds.filter((id) =>
     completedLessons.includes(id)
   ).length;
