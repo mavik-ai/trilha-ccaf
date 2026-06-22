@@ -38,7 +38,7 @@
 ### Fase 1 — Motor de planejamento *(o cérebro — isolado, sem UI)*
 **Bloco C · Lógica pura**
 - [x] `SPEC-003` — Função `gerarPlano(input) → Cronograma`: cálculo de carga, alocação por módulo, datas, veredito de data-alvo.
-- [ ] `SPEC-004` — Suíte de testes do motor cobrindo os edge cases do PRD §6.
+- [x] `SPEC-004` — Suíte de testes do motor cobrindo os edge cases do PRD §6.
 
 ### Fase 2 — Produto público (sem login)
 **Bloco D · Captura de input**

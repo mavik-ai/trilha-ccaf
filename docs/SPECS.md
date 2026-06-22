@@ -75,18 +75,18 @@
 
 ---
 
-## SPEC-004 — Testes do motor
+## SPEC-004 — Testes do motor [CONCLUÍDO]
 **Fase 1 · Bloco C** · Depende de: 003
 
 **Objetivo:** blindar a lógica do cérebro com testes dos edge cases do PRD §6.
 
 **Tasks:**
-- [ ] Setup Vitest.
-- [ ] Caso: 3h/sem com base incluída → plano longo, sem erro.
-- [ ] Caso: data-alvo no passado → veredito inviável, sem throw.
-- [ ] Caso: 10h+/sem avançado → poucas semanas.
-- [ ] Caso: integridade — soma de horas alocadas = total; nenhuma aula duplicada/perdida.
-- [ ] Caso: fronteira de módulo respeitada.
+- [x] Setup Vitest.
+- [x] Caso: 3h/sem com base incluída → plano longo, sem erro.
+- [x] Caso: data-alvo no passado → veredito inviável, sem throw.
+- [x] Caso: 10h+/sem avançado → poucas semanas.
+- [x] Caso: integridade — soma de horas alocadas = total; nenhuma aula duplicada/perdida.
+- [x] Caso: fronteira de módulo respeitada.
 
 **Arquivos:** `src/lib/planner.test.ts`, `vitest.config.ts`.
 
