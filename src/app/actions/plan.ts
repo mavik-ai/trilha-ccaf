@@ -4,6 +4,91 @@ import { db } from "@/db";
 import { plans, progress } from "@/db/schema";
 import { getSession } from "@/lib/auth/server";
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+
+// Map em memória para gerenciar rate limits simples por IP do cliente
+const rateLimitMap = new Map<string, number>();
+
+/**
+ * Limpa o mapa de rate limits em memória (útil para testes).
+ */
+export function clearRateLimits(): void {
+  rateLimitMap.clear();
+}
+
+/**
+ * Verifica se a requisição de um IP está sofrendo rate limit (máximo 1 req a cada 2 segundos).
+ */
+export function isRateLimited(key: string, limitMs: number = 2000): boolean {
+  const now = Date.now();
+  const lastTime = rateLimitMap.get(key);
+  if (lastTime && now - lastTime < limitMs) {
+    return true;
+  }
+  rateLimitMap.set(key, now);
+  return false;
+}
+
+/**
+ * Extrai de forma segura o endereço IP do cliente inspecionando os cabeçalhos do Next.js.
+ */
+export async function getClientIp(): Promise<string> {
+  try {
+    const headersList = await headers();
+    const xForwardedFor = headersList.get("x-forwarded-for");
+    if (xForwardedFor) {
+      return xForwardedFor.split(",")[0].trim();
+    }
+    return headersList.get("x-real-ip") || "unknown-ip";
+  } catch {
+    // Fallback seguro durante a execução de testes offline
+    return "test-ip";
+  }
+}
+
+/**
+ * Valida o token Turnstile diretamente com a API da Cloudflare.
+ */
+export async function verifyTurnstileToken(token: string): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA"; // Chave de testes secreta padrão
+  
+  try {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
+    });
+    
+    const data = await res.json();
+    return !!data.success;
+  } catch (error) {
+    console.error("Erro ao verificar token no Cloudflare Turnstile:", error);
+    return false;
+  }
+}
+
+/**
+ * Server Action para verificar o captcha anti-bot Turnstile antes do cadastro.
+ */
+export async function signUpWithTurnstileAction(email: string, turnstileToken: string) {
+  const ip = await getClientIp();
+  if (isRateLimited(ip)) {
+    return { error: "Muitas requisições. Aguarde 2 segundos." };
+  }
+
+  if (!email || !turnstileToken) {
+    return { error: "Dados obrigatórios ausentes para o cadastro." };
+  }
+
+  const isValid = await verifyTurnstileToken(turnstileToken);
+  if (!isValid) {
+    return { error: "Verificação anti-bot inválida. Por favor, tente novamente." };
+  }
+
+  return { success: true };
+}
 
 interface SavePlanInput {
   hoursWeek: number;
@@ -16,6 +101,11 @@ interface SavePlanInput {
  * Server Action para salvar o plano de estudos do usuário autenticado.
  */
 export async function savePlanAction(input: SavePlanInput) {
+  const ip = await getClientIp();
+  if (isRateLimited(ip)) {
+    return { error: "Muitas requisições. Aguarde 2 segundos." };
+  }
+
   try {
     const sessionRes = await getSession();
     const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;
@@ -49,6 +139,11 @@ export async function savePlanAction(input: SavePlanInput) {
  * Server Action para sincronizar as aulas concluídas do localStorage para o banco de dados.
  */
 export async function syncLocalProgressAction(lessonIds: string[]) {
+  const ip = await getClientIp();
+  if (isRateLimited(ip)) {
+    return { error: "Muitas requisições. Aguarde 2 segundos." };
+  }
+
   try {
     if (lessonIds.length === 0) {
       return { success: true };

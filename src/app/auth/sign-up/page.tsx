@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Mail, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Turnstile } from "@/components/auth/turnstile";
+import { signUpWithTurnstileAction } from "@/app/actions/plan";
 
 export default function SignUpPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [email, setEmail] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -20,11 +23,26 @@ export default function SignUpPage() {
     e.preventDefault();
     if (!email) return;
 
+    if (!turnstileToken) {
+      setError("Por favor, conclua a verificação anti-bot abaixo.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
+      // 1. Valida o captcha Turnstile do lado do servidor
+      const verifyRes = await signUpWithTurnstileAction(email, turnstileToken);
+      
+      if (verifyRes?.error) {
+        setError(verifyRes.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Se o captcha for válido, envia o link mágico
       const { error: signUpError } = await authClient.signIn.magicLink({
         email,
         callbackURL: callbackUrl,
@@ -113,6 +131,9 @@ export default function SignUpPage() {
               />
             </div>
           </div>
+
+          {/* Widget anti-bot Cloudflare Turnstile */}
+          <Turnstile onVerify={setTurnstileToken} />
 
           <Button
             type="submit"

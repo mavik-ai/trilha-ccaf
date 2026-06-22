@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { getSession } from "@/lib/auth/server";
 import { toggleLessonAction } from "./progress";
+import { clearRateLimits } from "./plan";
 
 // Mocks para isolar banco e identidade nos testes
 vi.mock("@/lib/auth/server", () => ({
@@ -28,6 +29,7 @@ vi.mock("@/db", () => {
 describe("Server Actions - Progress Toggling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearRateLimits(); // Reseta rate limiting para garantir isolamento
   });
 
   it("should return error in toggleLessonAction if user session is not present", async () => {

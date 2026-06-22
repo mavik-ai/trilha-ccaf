@@ -4,11 +4,17 @@ import { db } from "@/db";
 import { progress } from "@/db/schema";
 import { getSession } from "@/lib/auth/server";
 import { and, eq } from "drizzle-orm";
+import { getClientIp, isRateLimited } from "./plan";
 
 /**
  * Server Action para alternar (adicionar/remover) a conclusão de uma aula no banco de dados.
  */
 export async function toggleLessonAction(lessonId: string, completed: boolean) {
+  const ip = await getClientIp();
+  if (isRateLimited(ip)) {
+    return { error: "Muitas requisições. Aguarde 2 segundos." };
+  }
+
   try {
     const sessionRes = await getSession();
     const sessionData = sessionRes && "data" in sessionRes ? sessionRes.data : null;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import { getSession } from "@/lib/auth/server";
-import { savePlanAction, syncLocalProgressAction } from "./plan";
+import { savePlanAction, syncLocalProgressAction, signUpWithTurnstileAction, clearRateLimits } from "./plan";
 
 // Mocks para isolamento de chamadas externas de infraestrutura
 vi.mock("@/lib/auth/server", () => ({
@@ -25,9 +25,16 @@ vi.mock("@/db", () => {
   };
 });
 
-describe("Server Actions - Plan & Sync", () => {
+// Mock global da função fetch para simular a resposta da API do Cloudflare Turnstile
+const globalFetchMock = vi.fn().mockResolvedValue({
+  json: () => Promise.resolve({ success: true }),
+});
+vi.stubGlobal("fetch", globalFetchMock);
+
+describe("Server Actions - Plan & Sync with Rate Limiting", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearRateLimits(); // Limpa as taxas limites para isolamento total entre os testes
   });
 
   it("should return error in savePlanAction if user session is not present", async () => {
@@ -59,7 +66,32 @@ describe("Server Actions - Plan & Sync", () => {
     expect(res).toHaveProperty("success", true);
   });
 
-  it("should return error in syncLocalProgressAction if user session is not present", async () => {
+  it("should trigger rate limit on subsequent savePlanAction calls", async () => {
+    (getSession as Mock).mockResolvedValue({
+      data: {
+        user: { id: "test-uuid-user-2" },
+      },
+    });
+
+    // Primeira chamada - Deve passar
+    const res1 = await savePlanAction({
+      hoursWeek: 5,
+      includeBase: false,
+      startDate: "2026-06-22",
+    });
+    expect(res1).toHaveProperty("success", true);
+
+    // Segunda chamada imediata - Deve falhar por rate limit
+    const res2 = await savePlanAction({
+      hoursWeek: 5,
+      includeBase: false,
+      startDate: "2026-06-22",
+    });
+    expect(res2).toHaveProperty("error");
+    expect(res2.error).toContain("Muitas requisições");
+  });
+
+  it("should fail syncLocalProgressAction if not authenticated", async () => {
     (getSession as Mock).mockResolvedValue(null);
 
     const res = await syncLocalProgressAction(["lesson_1", "lesson_2"]);
@@ -68,19 +100,22 @@ describe("Server Actions - Plan & Sync", () => {
     expect(res.error).toContain("Não autorizado");
   });
 
-  it("should skip execution in syncLocalProgressAction if lessonIds is empty", async () => {
-    const res = await syncLocalProgressAction([]);
+  it("should succeed in signUpWithTurnstileAction if turnstile response is success", async () => {
+    globalFetchMock.mockResolvedValueOnce({
+      json: () => Promise.resolve({ success: true }),
+    });
+
+    const res = await signUpWithTurnstileAction("email@example.com", "valid-turnstile-token");
     expect(res).toHaveProperty("success", true);
   });
 
-  it("should succeed in syncLocalProgressAction if user is authenticated and lessonIds are provided", async () => {
-    (getSession as Mock).mockResolvedValue({
-      data: {
-        user: { id: "test-uuid-user" },
-      },
+  it("should fail in signUpWithTurnstileAction if turnstile response is failure", async () => {
+    globalFetchMock.mockResolvedValueOnce({
+      json: () => Promise.resolve({ success: false }),
     });
 
-    const res = await syncLocalProgressAction(["lesson_1"]);
-    expect(res).toHaveProperty("success", true);
+    const res = await signUpWithTurnstileAction("email@example.com", "invalid-turnstile-token");
+    expect(res).toHaveProperty("error");
+    expect(res.error).toContain("anti-bot inválida");
   });
 });

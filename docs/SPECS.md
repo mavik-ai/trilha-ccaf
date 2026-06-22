@@ -202,16 +202,16 @@
 
 ---
 
-## SPEC-011 — Progresso server-side + anti-bot
+## SPEC-011 — Progresso server-side + anti-bot [CONCLUÍDO]
 **Fase 3 · Bloco H** · Depende de: 010
 
 **Objetivo:** progresso autenticado confiável e form protegido.
 
 **Tasks:**
-- [ ] Server Action `toggleLesson(lessonId)` grava/remove em `progress`.
-- [ ] Optimistic UI no checklist.
-- [ ] Cloudflare Turnstile no cadastro + verificação server-side.
-- [ ] Rate limit básico nas actions.
+- [x] Server Action `toggleLesson(lessonId)` grava/remove em `progress`.
+- [x] Optimistic UI no checklist.
+- [x] Cloudflare Turnstile no cadastro + verificação server-side.
+- [x] Rate limit básico nas actions.
 
 **Arquivos:** `src/app/actions/progress.ts`, `src/components/auth/turnstile.tsx`.
 
