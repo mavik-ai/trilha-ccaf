@@ -45,7 +45,7 @@
 - [x] `SPEC-005` — Landing + Quiz de 4 perguntas (estado client, mobile-first).
 
 **Bloco E · Visualização do plano**
-- [ ] `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).
+- [x] `SPEC-006` — Tela de cronograma datado (render do `Cronograma`, visual MAVIK).
 - [ ] `SPEC-007` — Progresso local pré-login (checkboxes por aula em `localStorage`).
 
 ### Fase 3 — Auth & persistência

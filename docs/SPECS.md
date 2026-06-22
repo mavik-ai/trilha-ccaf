@@ -113,17 +113,17 @@
 
 ---
 
-## SPEC-006 — Tela de cronograma
+## SPEC-006 — Tela de cronograma [CONCLUÍDO]
 **Fase 2 · Bloco E** · Depende de: 005, 002
 
 **Objetivo:** renderizar o `Cronograma` no visual MAVIK.
 
 **Tasks:**
-- [ ] Bloco por semana com intervalo de datas e cursos/módulos.
-- [ ] Banner de veredito de data-alvo (folgado/limite/inviável) com a recomendação.
-- [ ] Badge "alto peso no exame" nas Fases 3/4.
-- [ ] Link "↗ abrir curso" por curso (Skilljar).
-- [ ] Botão "exportar PDF" (print CSS).
+- [x] Bloco por semana com intervalo de datas e cursos/módulos.
+- [x] Banner de veredito de data-alvo (folgado/limite/inviável) com a recomendação.
+- [x] Badge "alto peso no exame" nas Fases 3/4.
+- [x] Link "↗ abrir curso" por curso (Skilljar).
+- [x] Botão "exportar PDF" (print CSS).
 
 **Arquivos:** `src/app/plano/page.tsx`, `src/components/plan/*`.
 
